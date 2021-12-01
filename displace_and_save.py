@@ -31,7 +31,7 @@ epsilon = 0.00000001 # cMpc/h, standard deviation of my activate displacement in
 path_ = "/data/highz3/BLGas1024Issue/voronoi/becdmGas_{0}mpc_1e22_{1}_ic".format(L_BOX, N)
 type_ = "gas"
 high_word = 0
-nb_files_per_snap = 1 # Assumes that nb_files_per_snap divdes N**3 without rest and nb_files_per_snap is either 1 or the number of IC type 1 files
+nb_files_per_snap = 16 # Assumes that nb_files_per_snap divdes N**3 without rest and nb_files_per_snap is either 1 or the number of IC type 1 files
 flag_double_precision = 0
 if flag_double_precision == 1:
     bits_in_float = 64
@@ -135,11 +135,11 @@ if rank == 0:
     pos = np.hstack((np.reshape(pos_x_tmp, (pos_x_tmp.shape[0],1)), np.reshape(pos_y_tmp, (pos_y_tmp.shape[0],1)), np.reshape(pos_z_tmp, (pos_z_tmp.shape[0],1))))
 
     # Save in hdf5 file
-    print('Start writing file becdmGas_{0}mpc_1e22_{1}_ic.* with float precision {2}'.format(L_BOX, N, bits_in_float))
-    
+    print('Start writing files becdmGas_{0}mpc_1e22_{1}_ic.*.hdf5 with float precision {2}'.format(L_BOX, N, bits_in_float))
+
     for file_ in range(nb_files_per_snap):
-        hf = h5py.File('/data/highz3/BLGas1024Issue/voronoi/becdmGas_{0}mpc_1e22_{1}_ic.{2}'.format(L_BOX, N, file_), 'w')
-    
+        hf = h5py.File('/data/highz3/BLGas1024Issue/voronoi/becdmGas_{0}mpc_1e22_{1}_ic.{2}.hdf5'.format(L_BOX, N, file_), 'w')
+
         header = hf.create_group('Header')
         if nb_files_per_snap != 1:
             header.attrs.__setitem__('NumPart_ThisFile', np.uint32(readheader(path_+".{0}".format(file_), 'npartThisFile')))
@@ -163,7 +163,7 @@ if rank == 0:
         header.attrs.__setitem__('Flag_Metals', np.uint32(Flag_Metals))
         header.attrs.__setitem__('Flag_Feedback', np.uint32(Flag_Feedback))
         header.attrs.__setitem__('Flag_DoublePrecision', np.uint32(Flag_DoublePrecision))
-    
+
         nb_gas_ptcs_per_file = N**3/nb_files_per_snap
         part0 = hf.create_group('PartType0')
         part0.create_dataset('Coordinates', data = pos[nb_gas_ptcs_per_file*file_, nb_gas_ptcs_per_file*(file_+1)]*1000) # in ckpc/h, has bits_in_float type
@@ -171,12 +171,12 @@ if rank == 0:
         part0.create_dataset('Velocities', data = (readsnap(path_, 'vel', 'gas')[nb_gas_ptcs_per_file*file_, nb_gas_ptcs_per_file*(file_+1)]).astype('float{0}'.format(bits_in_float)))
         part0.create_dataset('Masses', data = (readsnap(path_, 'mass', 'gas')[nb_gas_ptcs_per_file*file_, nb_gas_ptcs_per_file*(file_+1)]).astype('float{0}'.format(bits_in_float)))
         part0.create_dataset('InternalEnergy', data = (readsnap(path_, 'u', 'gas')[nb_gas_ptcs_per_file*file_, nb_gas_ptcs_per_file*(file_+1)]).astype('float{0}'.format(bits_in_float)))
-    
+
         nb_dm_ptcs_per_file = N**3/nb_files_per_snap
         part1 = hf.create_group('PartType1')
         part1.create_dataset('Coordinates', data = (readsnap(path_, 'pos', 'dm')[nb_dm_ptcs_per_file*file_, nb_dm_ptcs_per_file*(file_+1)]).astype('float{0}'.format(bits_in_float)))
         part1.create_dataset('ParticleIDs', data = (readsnap(path_, 'pid', 'dm')[nb_dm_ptcs_per_file*file_, nb_dm_ptcs_per_file*(file_+1)]).astype('int32'))
         part1.create_dataset('Velocities', data = (readsnap(path_, 'vel', 'dm')[nb_dm_ptcs_per_file*file_, nb_dm_ptcs_per_file*(file_+1)]).astype('float{0}'.format(bits_in_float)))
-    
+
         hf.close()
-        print('Finished writing file becdmGas_{0}mpc_1e22_{1}_ic.{2} with float precision {3}'.format(L_BOX, N, file_, bits_in_float))
+        print('Finished writing file becdmGas_{0}mpc_1e22_{1}_ic.{2}.hdf5 with float precision {3}'.format(L_BOX, N, file_, bits_in_float))
