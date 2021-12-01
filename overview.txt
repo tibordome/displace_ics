@@ -1,0 +1,3 @@
+# For pygadgetreader
+PYTHONPATH=/data/highz3/BLGas1024Issue/voronoi/pygv/pygadgetreader:$PYTHONPATH
+export PYTHONPATH
