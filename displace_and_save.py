@@ -143,7 +143,7 @@ if rank == 0:
         header = hf.create_group('Header')
         if nb_files_per_snap != 1:
             header.attrs.__setitem__('NumPart_ThisFile', np.uint32(readheader(path_+".{0}".format(file_), 'npartThisFile')))
-            print("NumPart_ThisFile in file {0} is hopefully N**3/16 = {1} for both gas and dm".format(file_, N**3/nb_files_per_snap))
+            print("NumPart_ThisFile in file {0} is {1} and is hopefully N**3/16 = {2} for both gas and dm".format(file_, np.uint32(readheader(path_+".{0}".format(file_), 'npartThisFile')), N**3/nb_files_per_snap))
         else:
             assert nb_files_per_snap == 1
             header.attrs.__setitem__('NumPart_ThisFile', np.uint32(NumPart_Total))
